@@ -1,17 +1,18 @@
-#include "tcpconnctiondialog.h"
+﻿#include "tcpconnctiondialog.h"
 #include "ui_tcpconnctiondialog.h"
 
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QIntValidator>
 
 TcpConnctionDialog::TcpConnctionDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::TcpConnctionDialog)
 {
     ui->setupUi(this);
-    setWindowTitle("新建客户端");
+    setWindowTitle(QStringLiteral("新建客户端"));
     ui->LineEdit_LocalPort->setValidator(new QIntValidator(1,65535,this));//设置只能输入指定整数
     ui->LineEdit_TgtPort->setValidator(new QIntValidator(1,65535,this));//设置只能输入指定整数
 

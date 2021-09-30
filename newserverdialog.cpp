@@ -1,16 +1,17 @@
-#include "newserverdialog.h"
+﻿#include "newserverdialog.h"
 #include "ui_newserverdialog.h"
 
 #include <QHostAddress>
 #include <QNetworkInterface>
 #include <QMessageBox>
+#include <QIntValidator>
 
 newServerDialog::newServerDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::newServerDialog)
 {
     ui->setupUi(this);
-    setWindowTitle("创建服务器");
+    setWindowTitle(QStringLiteral("创建服务器"));
     ui->lineEditPort->setValidator(new QIntValidator(1,65535,this));//设置只能输入指定整数
 
     //查询本机IP

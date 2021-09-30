@@ -1,9 +1,10 @@
-#include "tcpserverwin.h"
+﻿#include "tcpserverwin.h"
 #include "ui_tcpserverwin.h"
 
 #include <QHostInfo>
 #include <QDebug>
 #include <QNetworkInterface>
+#include <QTextCodec>
 
 tcpServerWin::tcpServerWin(QWidget *parent,QString ip,quint16 port) :
     QMainWindow(parent),
@@ -34,13 +35,14 @@ tcpServerWin::tcpServerWin(QWidget *parent,QString ip,quint16 port) :
 
     connect(m_pTcpServer,SIGNAL(receiveDataSignal(QString)),this,SLOT(dealReceiveData(QString)));//接收数据显示到ui
     connect(this,SIGNAL(sendDataToClient(QString)),m_pTcpServer,SLOT(sendDataSignal(QString)));//发送数据
-    connect(this,tcpServerWin::disconnectSignal,m_pTcpServer,&Server::disconnectSlot);//服务器断开当前连接
+    connect(this,&tcpServerWin::disconnectSignal,m_pTcpServer,&Server::disconnectSlot);//服务器断开当前连接
 
     connect(ui->buttonStart,SIGNAL(clicked(bool)),this,SLOT(slotStartServer()));//启动服务器
     connect(ui->buttonStop,SIGNAL(clicked(bool)),this,SLOT(slotStopServer()));//停止服务器
 }
 tcpServerWin::~tcpServerWin()
 {
+    m_pTcpServer->close();//停止监听
     delete ui;
 }
 
@@ -113,12 +115,12 @@ void tcpServerWin::slotStartServer()
     bool t_isOK = m_pTcpServer->listen(QHostAddress(ui->lineEditLocalIP->text()),ui->lineEditPort->text().toInt());//监听
     if(false == t_isOK)
     {
-        ui->textEditRead->append("服务器监听失败，请检查IP和端口！");
+        ui->textEditRead->append(QStringLiteral("服务器监听失败，请检查IP和端口！"));
         return;
     }
     else
     {
-        ui->textEditRead->append("服务器启动成功！");
+        ui->textEditRead->append(QStringLiteral("服务器启动成功！"));
         ui->buttonStart->setEnabled(false);
         ui->buttonStop->setEnabled(true);
         ui->buttonSend->setEnabled(true);
@@ -142,7 +144,7 @@ void tcpServerWin::slotStopServer()
 {
     m_pTcpServer->close();//停止监听
     emit disconnectSignal();
-    ui->textEditRead->append("服务器已断开!");
+    ui->textEditRead->append(QStringLiteral("服务器已断开!"));
 
     ui->buttonStart->setEnabled(true);
     ui->buttonStop->setEnabled(false);

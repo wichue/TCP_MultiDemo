@@ -1,4 +1,4 @@
-#ifndef SERVER_H
+﻿#ifndef SERVER_H
 #define SERVER_H
 
 #include <QTcpServer>
@@ -11,10 +11,11 @@ class Server : public QTcpServer
     Q_OBJECT
 public:
     explicit Server(QObject *parent = 0);//重写构造函数
+    ~Server();
     QList<QTcpSocket*> m_tcpClientSocketList;
 
 protected:
-    void incomingConnection(int socketDescriptor);//重写incomingConnection虚函数
+    void incomingConnection(qintptr socketDescriptor);//重写incomingConnection虚函数
 
 signals:
     void receiveDataSignal(QString);

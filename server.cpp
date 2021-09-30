@@ -3,9 +3,21 @@
 #include <QHostAddress>
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QDebug>
+#include <QTextCodec>
 
 Server::Server(QObject *parent) : QTcpServer(parent)
 {
+}
+
+Server::~Server()
+{
+    for(int i =0;i < m_tcpClientSocketList.count();i++)
+    {
+        QTcpSocket *t_pItem = m_tcpClientSocketList.at(i);
+        t_pItem->disconnectFromHost();
+        t_pItem->close();
+    }
 }
 
 /**
@@ -14,7 +26,7 @@ Server::Server(QObject *parent) : QTcpServer(parent)
  *@author WIN-HBUPNA
  *@return
  */
-void Server::incomingConnection(int socketDescriptor)
+void Server::incomingConnection(qintptr socketDescriptor)
 {
     QTcpSocket *t_pTcpSocket = new QTcpSocket(this);//有新连接时，新建一个tcpsocket
     t_pTcpSocket->setSocketDescriptor(socketDescriptor);//关联新建的通信套接字
@@ -22,15 +34,18 @@ void Server::incomingConnection(int socketDescriptor)
     //获取客户端的IP和端口
     QString t_ip = t_pTcpSocket->peerAddress().toString();
     quint16 t_port = t_pTcpSocket->peerPort();
-    QString t_str = QString("[%1:%2] 连接成功").arg(t_ip).arg(t_port);
+    QString t_str = QString("[%1:%2] %3").arg(t_ip).arg(t_port).arg(QStringLiteral("连接成功"));
     emit receiveDataSignal(t_str);
 
     connect(t_pTcpSocket,&QTcpSocket::readyRead,
             [=]()
                 {
                     QByteArray t_array = t_pTcpSocket->readAll();
-                    QString t_Msg = QString(t_array);
-                    emit receiveDataSignal(t_Msg);
+
+//                    QTextCodec *gbk= QTextCodec::codecForName("GBK");
+//                    QString t_Msg = gbk->toUnicode(t_array);//获取的字符串可以显示中文
+
+                    emit receiveDataSignal(QString(t_array));
                 }
     );
 }

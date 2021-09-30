@@ -1,4 +1,4 @@
-#include "mywidget.h"
+﻿#include "mywidget.h"
 #include "ui_mywidget.h"
 
 #include <QHostAddress>
@@ -7,6 +7,7 @@
 #include <QNetworkInterface>
 #include <QAbstractSocket>
 #include <QMessageBox>
+#include <QIntValidator>
 
 MyWidget::MyWidget(QWidget *parent,QString serverIP,quint16 serverPort,quint16 localPort,int ret) :
     QWidget(parent),
@@ -25,8 +26,8 @@ MyWidget::MyWidget(QWidget *parent,QString serverIP,quint16 serverPort,quint16 l
     ui->lineEditLocalPort->setValidator(new QIntValidator(1,65535,this));//设置只能输入指定整数
     ui->lineEditPort->setValidator(new QIntValidator(1,65535,this));//设置只能输入指定整数
 
-//    QString t_localHostName = QHostInfo::localHostName();//获取主机名
-//    qDebug() << t_localHostName;
+    //    QString t_localHostName = QHostInfo::localHostName();//获取主机名
+    //    qDebug() << t_localHostName;
     QList<QHostAddress> t_list = QNetworkInterface::allAddresses();
     QStringList t_IpList;
     foreach (QHostAddress t_address, t_list)
@@ -51,68 +52,74 @@ MyWidget::MyWidget(QWidget *parent,QString serverIP,quint16 serverPort,quint16 l
 
     connect(m_pTcpSocket,&QTcpSocket::connected,
             [=]()
-                {
-                    ui->textEditRead->append("和服务器连接成功！");
-                    ui->pushButton_2->setEnabled(true);
-                    ui->pushButton->setEnabled(true);
-                    ui->buttonConnect->setEnabled(false);
-                    ui->lineEditIP->setEnabled(false);
-                    ui->lineEditPort->setEnabled(false);
-                    ui->lineEditLocalIP->setEnabled(false);
-                    ui->lineEditLocalPort->setEnabled(false);
-                    ui->checkBox->setEnabled(false);
-                }
-            );
+    {
+        ui->textEditRead->append(QStringLiteral("和服务器连接成功！"));
+        ui->pushButton_2->setEnabled(true);
+        ui->pushButton->setEnabled(true);
+        ui->buttonConnect->setEnabled(false);
+        ui->lineEditIP->setEnabled(false);
+        ui->lineEditPort->setEnabled(false);
+        ui->lineEditLocalIP->setEnabled(false);
+        ui->lineEditLocalPort->setEnabled(false);
+        ui->checkBox->setEnabled(false);
+    }
+    );
     //接收数据
     connect(m_pTcpSocket,&QTcpSocket::readyRead,
             [=]()
-                {
-                    QByteArray t_array = m_pTcpSocket->readAll();
-                    ui->textEditRead->append(t_array);
-                }
-            );
+    {
+        QByteArray t_array = m_pTcpSocket->readAll();
+        ui->textEditRead->append(t_array);
+    }
+    );
     connect(m_pTcpSocket,&QTcpSocket::disconnected,
             [=]()
-                {
-                    ui->textEditRead->append("和服务器断开连接！");
-                    ui->pushButton_2->setEnabled(false);
-                    ui->pushButton->setEnabled(false);
-                    ui->buttonConnect->setEnabled(true);
-                    ui->lineEditIP->setEnabled(true);
-                    ui->lineEditPort->setEnabled(true);
-                    ui->lineEditLocalIP->setEnabled(true);
+    {
+        ui->textEditRead->append(QStringLiteral("和服务器断开连接！"));
+        ui->pushButton_2->setEnabled(false);
+        ui->pushButton->setEnabled(false);
+        ui->buttonConnect->setEnabled(true);
+        ui->lineEditIP->setEnabled(true);
+        ui->lineEditPort->setEnabled(true);
+        ui->lineEditLocalIP->setEnabled(true);
 
-                    if(ui->checkBox->checkState() == 2)
-                    {
-                        ui->lineEditLocalPort->setEnabled(false);
-                    }
-                    else
-                    {
-                        ui->lineEditLocalPort->setEnabled(true);
-                    }
-                    ui->checkBox->setEnabled(true);
-                }
-            );
+        if(ui->checkBox->checkState() == 2)
+        {
+            ui->lineEditLocalPort->setEnabled(false);
+        }
+        else
+        {
+            ui->lineEditLocalPort->setEnabled(true);
+        }
+        ui->checkBox->setEnabled(true);
+    }
+    );
     //信息超出范围，自动滚动到最下方
     connect(ui->textEditRead,&QTextEdit::textChanged,
             [=]()
-                {
-                    ui->textEditRead->moveCursor(QTextCursor::End);
-                }
-            );
+    {
+        ui->textEditRead->moveCursor(QTextCursor::End);
+    }
+    );
     //窗口关闭，自动断开连接
     connect(this,&MyWidget::destroyed,
             [=]()
-                {
-                    on_pushButton_2_clicked();
-                }
-            );
+    {
+        on_pushButton_2_clicked();
+    }
+    );
     
     connect(ui->checkBox,SIGNAL(stateChanged(int)),this,SLOT(slotCheckBoxChanged(int)));
 }
 
 MyWidget::~MyWidget()
 {
+    if(nullptr != m_pTcpSocket)
+    {
+        m_pTcpSocket->disconnectFromHost();
+        m_pTcpSocket->waitForDisconnected();
+        m_pTcpSocket->close();
+    }
     delete ui;
 }
 
@@ -129,10 +136,10 @@ quint16 MyWidget::getPort()
 
 void MyWidget::receiveIndex(int t_index)
 {
-        m_index = t_index;
-        qDebug() <<m_index;
-        QString t_IP_Port = QString("%1:%2").arg(ui->lineEditIP->text()).arg(ui->lineEditPort->text());
-        m_currIP_Port = QString::number(m_index) + t_IP_Port;
+    m_index = t_index;
+    qDebug() <<m_index;
+    QString t_IP_Port = QString("%1:%2").arg(ui->lineEditIP->text()).arg(ui->lineEditPort->text());
+    m_currIP_Port = QString::number(m_index) + t_IP_Port;
 }
 
 /**
@@ -170,7 +177,7 @@ void MyWidget::on_buttonConnect_clicked()
         m_pTcpSocket->waitForConnected();
         if(m_pTcpSocket->localPort() == 0)
         {
-            ui->textEditRead->append("连接失败，请检查服务器端口！");
+            ui->textEditRead->append(QStringLiteral("连接失败，请检查服务器端口！"));
             return;
         }
     }
@@ -189,7 +196,7 @@ void MyWidget::on_buttonConnect_clicked()
         qDebug() << m_pTcpSocket->localPort();
         if(m_pTcpSocket->localPort() == 0)
         {
-            ui->textEditRead->append("连接失败，请检查服务器端口！");
+            ui->textEditRead->append(QStringLiteral("连接失败，请检查服务器端口！"));
             return;
         }
         if(m_pTcpSocket->localPort() != ui->lineEditLocalPort->text().toInt())
@@ -202,9 +209,9 @@ void MyWidget::on_buttonConnect_clicked()
 
 /**
  *@brief 断开当前连接按钮触发
- *@param 
+ *@param
  *@author WIN-HBUPNA
- *@date 
+ *@date
  */
 void MyWidget::on_pushButton_2_clicked()
 {
@@ -218,9 +225,9 @@ void MyWidget::on_pushButton_2_clicked()
 }
 /**
  *@brief checkBox状态改变槽函数
- *@param 
+ *@param
  *@author WIN-HBUPNA
- *@date 
+ *@date
  */
 void MyWidget::slotCheckBoxChanged(int)
 {

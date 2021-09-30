@@ -1,4 +1,4 @@
-#ifndef TCPSERVERWIN_H
+﻿#ifndef TCPSERVERWIN_H
 #define TCPSERVERWIN_H
 
 #include <QMainWindow>

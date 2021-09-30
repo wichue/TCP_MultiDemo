@@ -1,4 +1,4 @@
-#include "mymainwindow.h"
+﻿#include "mymainwindow.h"
 #include "ui_mymainwindow.h"
 
 #include <QDialog>
@@ -19,23 +19,23 @@ MyMainWindow::MyMainWindow(QWidget *parent) :
     ui(new Ui::MyMainWindow)
 {
     ui->setupUi(this);
-    setWindowTitle("TCP测试工具");
+    setWindowTitle(QStringLiteral("TCP测试工具"));
     ui->buttonTest->hide();
-    connect(this,&MyMainWindow::destroyed,
-            [=]()
-                {
-                    on_buttonCloseClient_clicked();
-                    on_buttonCloseServer_clicked();
-                }
-            );
-    connect(ui->actionQuit,&QAction::triggered,
-            [=]()
-                {
-                    on_buttonCloseClient_clicked();
-                    on_buttonCloseServer_clicked();
-                    this->close();
-                }
-            );
+//    connect(this,&MyMainWindow::destroyed,
+//            [=]()
+//                {
+//                    on_buttonCloseClient_clicked();
+//                    on_buttonCloseServer_clicked();
+//                }
+//            );
+//    connect(ui->actionQuit,&QAction::triggered,
+//            [=]()
+//                {
+//                    on_buttonCloseClient_clicked();
+//                    on_buttonCloseServer_clicked();
+//                    this->close();
+//                }
+//            );
 }
 
 MyMainWindow::~MyMainWindow()
